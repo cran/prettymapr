@@ -23,7 +23,7 @@ Dewey Dunnington <dewey@fishandwhistle.net>
 }
 \keyword{ package }
 \examples{
-
+#dont test to cut down on check time
 \donttest{
 #bbox functions make it easy to manipulate bounding boxes
 wolfville <- searchbbox("wolfville ns")
