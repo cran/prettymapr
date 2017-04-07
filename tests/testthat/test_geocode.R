@@ -49,6 +49,7 @@ test_that("emptys and nulls produce the correct output", {
   expect_is(list0, "list")
   expect_length(list0, 0)
 
+  expect_silent(geocode(NA_character_, output = "data.frame"))
   dfNA <- geocode(NA_character_, output = "data.frame")
   expect_is(dfNA, "data.frame")
   expect_equal(nrow(dfNA), 1)
@@ -61,8 +62,8 @@ test_that("emptys and nulls produce the correct output", {
   expect_identical(listNA, geocode("", output = "list"))
 
   # check that the correct columns are returned for empty results
-  expect_equal(c("query", "status", "source", "rank", "lon", "lat", "address",
-                 "bbox_n", "bbox_e", "bbox_s", "bbox_w"), names(dfNA))
+  dfgood <- geocode("wolfville, ns", output = "data.frame")
+  expect_equal(names(dfNA), names(dfgood)[1:ncol(dfNA)])
 })
 
 test_that("output is vectorized with correct lengths", {
@@ -82,7 +83,7 @@ test_that("output is vectorized with correct lengths", {
 
 test_that("errors in the geocode function don't stop execution", {
   expect_silent(geocode("something", source = "error_source"))
-  expect_silent(geocode(rep("something", 10), source = "error_source"))
+  expect_silent(geocode(rep("something", 10), source = "error_source", progress = "none"))
 })
 
 test_that("invalid pickpoint API key results in correct error message", {
@@ -110,8 +111,6 @@ test_that("mesages are printed when defaults are guessed", {
                  "Using default API key for pickpoint.io.")
   expect_message(geocode(factor("something")),
                  "Coercing argument 'location' from 'factor' to 'character'")
-  expect_message(geocode("something", quiet = FALSE),
-                 "No default source set, using pickpoint.io")
   expect_silent(geocode("something", key = "yxsN6E8EYYHFF_xsa_uL", source = "pickpoint"))
 })
 
@@ -124,4 +123,51 @@ test_that("default source can be set from options", {
 
 test_that("non 200 status codes throw warning when quiet = FALSE", {
   expect_warning(geocode("something", key = "not a key", quiet = FALSE))
+})
+
+test_that("vectors that contain zero-length input don't screw up the query / source columns", {
+
+  # this issue involved inconsistent column ordering for empty returns, and
+  # manifested itself as a lot of odd <NA> values appearing where they shouldn't
+
+  cities <- c("wolfville, ns", "halifax, ns", "calgary, ab", "auckland, nz", "middlebury, vt",
+              "ottawa, on")
+
+  df1 <- geocode(cities)
+  list1 <- geocode(cities, output = "list")
+  cities[2] <- ""
+  df2 <- geocode(cities)
+  list2 <- geocode(cities, output = "list")
+
+  expect_identical(nrow(df1), nrow(df2))
+  identical(df1[-2,], df2[-2,])
+})
+
+test_that("progress bar is hidden when appropriate", {
+  cities <- c("wolfville, ns", "halifax, ns")
+  expect_output(geocode(cities, key = "yxsN6E8EYYHFF_xsa_uL"))
+  # progress = none should be silent
+  expect_silent(geocode(cities, key = "yxsN6E8EYYHFF_xsa_uL", progress = "none"))
+  # length 1 argument should be silent
+  expect_silent(geocode(cities[1], key = "yxsN6E8EYYHFF_xsa_uL"))
+  # quiet = FALSE should not have a status bar, but won't be 'silent', per se
+  # don't know how to test for this
+})
+
+test_that("setting the default source changes the source", {
+  # check base default
+  default_source <- get_default_geocoder()
+  expect_equal(default_source, "pickpoint")
+  expect_equal(geocode("wolfville ns")$source, default_source)
+
+  # check new default
+  new_default <- "google"
+  set_default_geocoder(new_default)
+  expect_equal(get_default_geocoder(), new_default)
+  expect_equal(geocode("wolfville ns")$source, new_default)
+
+  # check resetting default
+  set_default_geocoder(NULL)
+  expect_equal(get_default_geocoder(), "pickpoint")
+  expect_equal(geocode("wolfville ns")$source, "pickpoint")
 })

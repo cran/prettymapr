@@ -7,7 +7,8 @@
 #' requests you should really use your own API key if you are using the default (pickpoint).
 #' Note that the Google Terms seem to indicate that you cannot place locations obtained
 #' from their API on non-google maps. Locations are all geocoded with erorrs kept quiet,
-#' which may result in list output containing items of class 'try-error', or data frame
+#' which may result in list output containing items with a $status element describing
+#' the error message, or data frame
 #' output containing a non-OK status in the status column.
 #'
 #' @param location A character vector (or an object that can be coerced to one)
@@ -37,8 +38,10 @@
 #'   or a directory name (e.g. 'geo.cache'), which keeps an unlimited number of results. Use
 #'   \link{clear_geocode_cache} to clear the cache.
 #' @param quiet By default, error messages are suppressed, and are instead included in the
-#'   output as objects of class try-error (list output) or the appropriate value in the
+#'   output as objects with a $status describing the error (list output) or the appropriate value in the
 #'   'status' column (data frame output).
+#' @param progress A plyr status bar, one of "time", "text", or "none". Passing quiet = FALSE
+#'   will also disable the progress bar.
 #' @param ... A number of key/value pairs to append to the URL, specifying
 #'   further options specific to each API. Google users may wish to provide
 #'   \code{sensor}, \code{client} and \code{signature} arguments for use with the enterprise
@@ -65,21 +68,33 @@
 #'
 geocode <- function(location, output=c("data.frame", "list"), source = "default",
                     messaging = NULL, limit=1, key=NULL, quiet = TRUE, cache = NA,
-                    ...) {
+                    progress = c("time", "text", "none"), ...) {
   # output ban be "list" or "data.frame"
   output <- match.arg(output)
+  progress <- match.arg(progress)
+
+  # disable progress bar for length 1 or quiet = FALSE
+  if((length(location) == 1) || !quiet) {
+    progress <- "none"
+  }
 
   if(!is.character(location)) {
     message("Coercing argument 'location' from '", class(location)[1], "' to 'character'")
     location <- as.character(location)
   }
 
-  # keep out trivial location cases
+  # deal with special location cases
   if(length(location) == 0) {
     # zero-length input means zero-length output
     return(result_zero_length(output))
   } else if(length(location) == 1) {
-    if(is.na(location) || (nchar(location) <= 3)) return(result_empty(location, output))
+    if(is.na(location) || (nchar(location) <= 3)) {
+      if(output == "data.frame") {
+        return(cbind(query = location, source = NA_character_, result_empty("data.frame")))
+      } else {
+        return(list(NULL))
+      }
+    }
   }
 
   # check quiet param
@@ -133,9 +148,9 @@ geocode <- function(location, output=c("data.frame", "list"), source = "default"
                    error_source = geocode_error)[[source]]
 
   geocoder_partial <- function(loc) {
-    # keep out trivial cases from geocoder functions
-    if(is.na(location) || (nchar(location) <= 3)) return(result_empty(location, output))
-    geocoder(loc, output = output, limit = limit, key = key, quiet = quiet, ...)
+    # keep out trivial cases from geocoder functions (causes errors TODO)
+    if(is.na(loc) || (nchar(loc) <= 3)) return(result_empty(output))
+    geocoder(loc, output = output, limit = limit, key = key, quiet = quiet, cache = cache, ...)
   }
 
   # generate output
@@ -147,14 +162,16 @@ geocode <- function(location, output=c("data.frame", "list"), source = "default"
                      bbox_n = NA_real_, bbox_e = NA_real_, bbox_s = NA_real_,
                      bbox_w = NA_real_, stringsAsFactors = FALSE)
 
-    df <- plyr::adply(df, 1, function(row) geocoder_partial(row$query))
+    df <- plyr::adply(df, 1, function(row) geocoder_partial(row$query),
+                      .progress = progress)
+
     # ensure column output order
     cnames <- c("query", "source", "status", "rank", "lon", "lat", "address",
                 "bbox_n", "bbox_e", "bbox_s", "bbox_w")
     df[c(cnames[cnames %in% names(df)], names(df)[!(names(df) %in% cnames)])]
   } else {
     # list is just the result of geocoder
-    plyr::llply(location, geocoder_partial)
+    plyr::llply(location, geocoder_partial, .progress = progress)
   }
 }
 
@@ -290,9 +307,59 @@ geocode_pickpoint <- function(location, output, quiet = TRUE,
 
 # this could probably be moved to the public in the future, but for now
 # it's just using the old style option setting
+
+#' Get/Set the default geocoder
+#'
+#' The \link{geocode} function can use google, pickpoint, or data science toolkit
+#' to turn human-readable names into coordinates. Use these methods to get/set
+#' the default source. These will need to be called once per namespace load.
+#'
+#' @param geocoder The new source to use. One of "pickpoint", "google", or "dsk".
+#'
+#' @export
+#'
+#' @examples
+#' get_default_geocoder()
+#' set_default_geocoder("google")
+#' (set_default_geocoder(NULL))
+#'
 get_default_geocoder <- function() {
-  getOption("prettymapr.geosource")
+  # try old default in case it was set
+  old_default <- getOption("prettymapr.geosource")
+  if(is.null(old_default)) {
+    prettymapr_geocoding$default_geocoder
+  } else {
+    message("Using options() to set default geocoder is deprecated. Use ",
+            "set_default_geocoder() instead.")
+    old_default
+  }
 }
+
+#' @rdname get_default_geocoder
+#' @export
+set_default_geocoder <- function(geocoder) {
+  # use NULL to reset the default
+  if(is.null(geocoder)) {
+    geocoder <- "pickpoint"
+    options(prettymapr.geosource = NULL)
+  }
+
+  if(!is.character(geocoder) || (length(geocoder) != 1)) {
+    stop("'geocoder' must be a character vector of length 1")
+  }
+
+  if(!(geocoder %in% c("google", "dsk", "pickpoint", "error_source"))) {
+    stop("Unrecognized geocode source: ", geocoder)
+  }
+
+  old_geocoder <- suppressMessages(get_default_geocoder())
+  prettymapr_geocoding$default_geocoder <- geocoder
+  invisible(old_geocoder)
+}
+
+prettymapr_geocoding <- new.env(parent = emptyenv())
+prettymapr_geocoding$default_geocoder <- "pickpoint"
+
 
 # this is a test function that passes an invalid URL to geocode_google
 geocode_error <- function(...) {
@@ -318,9 +385,9 @@ result_zero_length <- function(output) {
   }
 }
 
-result_empty <- function(location, output) {
+result_empty <- function(output) {
   if(output == "data.frame") {
-    data.frame(query = location, status = "empty input", source = NA_character_,
+    data.frame(status = "empty input",
                rank = NA_integer_, lon = NA_real_, lat = NA_real_, address = NA_character_,
                bbox_n = NA_real_, bbox_e = NA_real_, bbox_s = NA_real_,
                bbox_w = NA_real_,

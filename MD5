@@ -1,8 +1,8 @@
-08bed8088ddfc3cbb03f3a6b757a3a5d *DESCRIPTION
-1e1ed6dde5c84a0433f09edff4978b98 *NAMESPACE
+0c95e9f96da8fd15744561f539b47299 *DESCRIPTION
+ddf25b7d18e5960aabe6219ccadeebde *NAMESPACE
 9d27d97b164861ecdfcde2e6ca7030eb *R/bboxtools.R
 8950eeb239fb4eb428b0f96879c2179a *R/caches.R
-69124ba09c63324dc508bf31929ea395 *R/geocode.R
+4359f866d619523179af04e5a643e944 *R/geocode.R
 4c618978c855e4b518051490058ac35f *R/northarrow.R
 0cb006ef60eae11331a35e8538780942 *R/prettymap.R
 615de6bd5d2c28d84a2351ff9684d2f9 *R/restquery.R
@@ -15,7 +15,8 @@ edd9519913b30df63634aa20a118d703 *inst/README_files/figure-markdown_github/unnam
 c31898bc850efdd99725268a888a25ef *man/addnortharrow.Rd
 f28636848e07d0892032c8972a9ad344 *man/addscalebar.Rd
 dbfac908787678a94818127c1abb01a1 *man/clear_geocode_cache.Rd
-53bcaaf9ef1d2b1e71711d5cb54235ac *man/geocode.Rd
+3aee57196129e34ebfd044006045d4da *man/geocode.Rd
+b61e65de7bb589787cfc779172850640 *man/get_default_geocoder.Rd
 63841e354cfeb7d16578668657389eb6 *man/makebbox.Rd
 4d6f701817d654cf039a028e0479f309 *man/mergebbox.Rd
 a93acfd1bfead0805c6d2334deba9d67 *man/plotscalebar.Rd
@@ -26,5 +27,5 @@ f00cbba6c95abf7e9aa5dccdce4bed14 *man/scalebarparams.Rd
 d0a4e1db0be5d660439c55631b1cab3a *man/zoombbox.Rd
 406d7a2a7fd53e17e69d94261d9546c1 *tests/test-all.R
 e4b522a658f5027e4d9db8b0481c897b *tests/testthat/test_caches.R
-a134a2fd9fb61ed9817ad15cf4be07da *tests/testthat/test_geocode.R
+ea34735cad82eb2946b529a43eb886ca *tests/testthat/test_geocode.R
 4388468a5eac7a89d6fb5d732d0bf417 *tests/testthat/test_restquery.R
