@@ -1,13 +1,12 @@
-0c95e9f96da8fd15744561f539b47299 *DESCRIPTION
+0c8200c60ae9ccfe7373ed843bf7fb41 *DESCRIPTION
 ddf25b7d18e5960aabe6219ccadeebde *NAMESPACE
 9d27d97b164861ecdfcde2e6ca7030eb *R/bboxtools.R
 8950eeb239fb4eb428b0f96879c2179a *R/caches.R
-4359f866d619523179af04e5a643e944 *R/geocode.R
+39b166acc9583497b6064bc61b10e91a *R/geocode.R
 4c618978c855e4b518051490058ac35f *R/northarrow.R
 0cb006ef60eae11331a35e8538780942 *R/prettymap.R
 615de6bd5d2c28d84a2351ff9684d2f9 *R/restquery.R
 a5a24654329130e2e748cfd5dfbacce1 *R/scalebar.R
-d58f91c4417b631cfb2eb38979a4a79f *README.md
 88621bd781e05daf8107257d0213d34f *inst/README_files/figure-markdown_github/unnamed-chunk-5-1.png
 536ea686b673eb680d9a59927a95b892 *inst/README_files/figure-markdown_github/unnamed-chunk-6-1.png
 882aa36854dfb62519495983428f06de *inst/README_files/figure-markdown_github/unnamed-chunk-7-1.png
@@ -15,7 +14,7 @@ edd9519913b30df63634aa20a118d703 *inst/README_files/figure-markdown_github/unnam
 c31898bc850efdd99725268a888a25ef *man/addnortharrow.Rd
 f28636848e07d0892032c8972a9ad344 *man/addscalebar.Rd
 dbfac908787678a94818127c1abb01a1 *man/clear_geocode_cache.Rd
-3aee57196129e34ebfd044006045d4da *man/geocode.Rd
+9c87afd978a1e3e26421b26e8ef8bba1 *man/geocode.Rd
 b61e65de7bb589787cfc779172850640 *man/get_default_geocoder.Rd
 63841e354cfeb7d16578668657389eb6 *man/makebbox.Rd
 4d6f701817d654cf039a028e0479f309 *man/mergebbox.Rd
