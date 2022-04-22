@@ -1,6 +1,6 @@
 
 # Calculates the geodesic distance between two points specified by radian latitude/longitude using the
-# Haversine formula (hf) from: http://www.r-bloggers.com/great-circle-distance-calculations-in-r/
+# Haversine formula (hf)
 .torad <- function(deg) {
   deg*pi/180.0
 }
@@ -125,7 +125,7 @@ scalebarparams <- function(plotunit=NULL, plotepsg=NULL, widthhint=0.25, unitcat
        extents[3] >= -90 &&
        extents[3] <= 90 &&
        extents[4] >= -90 &&
-       extents[4 <= 90]) {
+       extents[4] <= 90) {
       message("Autodetect projection: assuming lat/lon (epsg 4326)")
       plotepsg <- 4326
     } else {

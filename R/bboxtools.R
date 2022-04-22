@@ -13,15 +13,24 @@
 #'
 #' @export
 makebbox <- function(n, e, s, w) {
+
+  if (isTRUE(n < s)) {
+    warning("North less than south. Check order?")
+  }
+
+  if (isTRUE(e < w)) {
+    warning("East less than west. Check order?")
+  }
+
   matrix(c(w, s, e, n), byrow=FALSE, ncol=2, dimnames=list(c("x", "y"), c("min", "max")))
 }
 
 #' Query The Interwebs For A Bounding Box
 #'
-#' Use the \href{https://pickpoint.io/}{PickPoint.io API} or Google API to
+#' Use the PickPoint.io API or Google API to
 #' retreive a bounding box for the given query. Note that if
 #' you would like to use \code{google} as a source, you must agree to the Google
-#' API \href{https://developers.google.com/terms/}{terms and conditions}.
+#' API terms and conditions.
 #'
 #' @param querystring The search query. Passing a vector in will find the bounding box that contains
 #'                    all bounding boxes returned.
@@ -30,7 +39,7 @@ makebbox <- function(n, e, s, w) {
 #'   to permanently use \code{google} as a source.
 #' @return A 2x2 matrix describing a bounding box like that returned by \code{sp::bbox()}
 #'
-#' @examples
+#' @examplesIf identical(Sys.getenv("R_PRETTYMAPR_HAS_API_KEY"), "true")
 #' #don't test to speed up checking time
 #' \donttest{
 #' searchbbox("kings county, NS")

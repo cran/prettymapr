@@ -1,9 +1,7 @@
 #' Geocode Locations
 #'
-#' Geocode locations using the
-#' \href{https://developers.google.com/maps/documentation/geocoding/intro}{Google
-#' Web API}, the \href{https://pickpoint.io/}{PickPoint.io API}, or the
-#' \href{http://www.datasciencetoolkit.org/}{Data Science Toolkit API}. For large
+#' Geocode locations using the Google Web API, the PickPoint.io API, or the
+#' Data Science Toolkit API. For large
 #' requests you should really use your own API key if you are using the default (pickpoint).
 #' Note that the Google Terms seem to indicate that you cannot place locations obtained
 #' from their API on non-google maps. Locations are all geocoded with erorrs kept quiet,
@@ -25,8 +23,7 @@
 #' @param source One of "default", "google", "pickpoint", or "dsk". If "default", the
 #'   function calls \code{getOption("prettymapr.geosource")} or chooses
 #'   "pickpoint" if none is set. If using "pickpoint", please
-#'   \href{https://app.pickpoint.io/sign-up}{sign up for your own (free) API
-#'   key} to avoid using the default excessively.
+#'   sign up for your own (free) API key to avoid using the default excessively.
 #' @param messaging \code{TRUE} if verbose messaging is desired (now deprecated,
 #'   use 'quiet = FALSE' instead.
 #' @param limit The number of results to return per query. This refers to
@@ -52,7 +49,7 @@
 #'
 #' @export
 #'
-#' @examples
+#' @examplesIf identical(Sys.getenv("R_PRETTYMAPR_HAS_API_KEY"), "true")
 #' # don't test to speed up checking time
 #' \donttest{
 #' geocode("wolfville, ns")
@@ -178,20 +175,20 @@ geocode <- function(location, output=c("data.frame", "list"), source = "default"
 # these geocoder functions require sanitized input of length 1
 
 geocode_dsk <- function(...) {
-  geocode_google(..., endpoint = "http://www.datasciencetoolkit.org/maps/api/geocode/json",
+  geocode_google(..., endpoint = "https://www.datasciencetoolkit.org/maps/api/geocode/json",
                  .encoding = "UTF-8")
 }
 
 geocode_google <- function(location, output, sensor = FALSE,
                            quiet = TRUE, cache = NA, limit = 1,
-                           endpoint = "http://maps.googleapis.com/maps/api/geocode/json", ...) {
+                           endpoint = "https://maps.googleapis.com/maps/api/geocode/json", ...) {
 
   # query server
   data <- try(restquery(endpoint, sensor = sensor, address = location, ..., .quiet = quiet,
                         .parser = rjson::fromJSON, .cache = cache), silent = TRUE)
 
   # check for try-error
-  if(class(data) == "try-error") {
+  if(inherits(data, "try-error")) {
     return(result_error(attr(data, "condition")$message, output))
   }
 
@@ -260,7 +257,7 @@ geocode_pickpoint <- function(location, output, quiet = TRUE,
                         .parser = parse_pickpoint, .cache = cache), silent = TRUE)
 
   # check for try-error
-  if(class(data) == "try-error") {
+  if(inherits(data, "try-error")) {
     return(result_error(attr(data, "condition")$message, output))
   }
 
