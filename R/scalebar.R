@@ -11,7 +11,6 @@
 
   # require gdal for actual projections
   if(!requireNamespace("sp")) stop("package 'sp' is required for non lat/lon coordinates")
-  if(!requireNamespace("rgdal")) stop("package 'rgdal' is required for non lat/lon coordinates")
 
   coords <- sp::coordinates(matrix(c(x,y), byrow=TRUE, ncol=2))
   spoints <- sp::SpatialPoints(coords, sp::CRS(paste0("+init=epsg:", epsg)))
@@ -101,12 +100,6 @@
 #' @examples
 #' plot(1:5, 1:5, asp=1)
 #' scalebarparams(plotunit="m")
-#' \donttest{
-#' library(maptools)
-#' data(wrld_simpl)
-#' plot(wrld_simpl, xlim=c(-66.86, -59.75), ylim=c(43, 47.3)) # Nova Scotia
-#' scalebarparams()
-#' }
 #'
 #' @seealso \link{addscalebar}
 #'
@@ -305,17 +298,6 @@ plotscalebar <- function(x, y, ht, params, style="bar", adj=c(0,0), tick.cex=0.7
 #' @examples
 #' plot(1:5, 1:5, asp=1)
 #' addscalebar(plotunit="m")
-#' \donttest{
-#' library(maptools)
-#' data(wrld_simpl)
-#' plot(wrld_simpl, xlim=c(-66.86, -59.75), ylim=c(43, 47.3)) #Nova Scotia
-#' addscalebar()
-#'
-#' #also works in non-lat/lon coordinate systems
-#' addscalebar(plotepsg=3395) #specify plot is in mercator projection
-#' addscalebar(plotepsg=26920) #specify plot is in UTM Zone 20N
-#'
-#' }
 #'
 addscalebar <- function(plotunit=NULL, plotepsg=NULL, widthhint=0.25, unitcategory="metric",
                      htin=0.1, padin=c(0.15, 0.15), style="bar", bar.cols=c("black", "white"),
